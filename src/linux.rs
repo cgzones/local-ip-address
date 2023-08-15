@@ -81,7 +81,7 @@ fn local_ip_impl(family: RtAddrFamily) -> Result<IpAddr, Error> {
         .expect("valid rtmsg");
 
     let recv = rtnl
-        .send(Rtm::Getroute, NlmF::REQUEST, NlPayload::Payload(ifroutemsg))
+        .send(Rtm::Getroute, NlmF::REQUEST | NlmF::ACK, NlPayload::Payload(ifroutemsg))
         .map_err(|err| Error::StrategyError(err.to_string()))?;
 
     for response in recv {
@@ -142,9 +142,6 @@ fn local_ip_impl(family: RtAddrFamily) -> Result<IpAddr, Error> {
             }
         }
     }
-
-    // FIXME: do not fallback!
-    println!("using fallback...");
 
     let (rtnl, _) = NlRouter::connect(NlFamily::Route, None, Groups::empty())
         .map_err(|err| Error::StrategyError(err.to_string()))?;
